@@ -1,0 +1,38 @@
+name: pachalik_flutter
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0-247.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod:
+  go_router:
+  flutter_quill:
+  flutter_quill_extensions:
+  vsc_quill_delta_to_html:
+  hive:
+  hive_flutter:
+  supabase_flutter:
+  reorderables:
+  pdf:
+  printing:
+  uuid:
+  intl:
+  gap:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
