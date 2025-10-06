@@ -26,6 +26,7 @@ dependencies:
   uuid:
   intl:
   gap:
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:

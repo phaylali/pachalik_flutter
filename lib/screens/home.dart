@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pachalik_flutter/screens/blocks_list.dart';
 import 'package:pachalik_flutter/screens/canvas.dart';
+import 'package:pachalik_flutter/providers/canvas_provider.dart';
+import 'package:pachalik_flutter/models/block_model.dart';
 import 'package:pachalik_flutter/screens/documents_list.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canvasBlocks = ref.watch(canvasBlocksProvider);
+
+    void addBlockToCanvas(Block block) {
+      ref.read(canvasBlocksProvider.notifier).addBlock(block);
+    }
+
+    void onReorder(int oldIndex, int newIndex) {
+      ref.read(canvasBlocksProvider.notifier).reorderBlocks(oldIndex, newIndex);
+    }
+
+    void onDelete(int index) {
+      ref.read(canvasBlocksProvider.notifier).deleteBlock(index);
+    }
+
     return Scaffold(
       body: Center(
         child: Container(
@@ -136,7 +153,11 @@ class HomeScreen extends StatelessWidget {
                               width: 2,
                             ),
                           ),
-                          child: DocumentCanvas(),
+                          child: DocumentCanvas(
+                            blocks: canvasBlocks,
+                            onReorder: onReorder,
+                            onDelete: onDelete,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -168,8 +189,8 @@ class HomeScreen extends StatelessWidget {
                                 Expanded(
                                   child: TabBarView(
                                     children: [
-                                      BlocksList(),      // First tab: Blocks
-                                      DocumentsList(),   // Second tab: Documents
+                                      BlocksList(onAddToCanvas: addBlockToCanvas),
+                                      DocumentsList(),
                                     ],
                                   ),
                                 ),
@@ -189,4 +210,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-

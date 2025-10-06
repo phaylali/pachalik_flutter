@@ -1,70 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pachalik_flutter/widgets/block_preview.dart';
 import 'package:pachalik_flutter/models/block_model.dart';
+import 'package:pachalik_flutter/providers/canvas_provider.dart';
+import 'package:pachalik_flutter/widgets/block_edit_dialog.dart';
 
-class DocumentCanvas extends StatefulWidget {
-  const DocumentCanvas({super.key});
+class DocumentCanvas extends ConsumerWidget {
+  final List<Block> blocks;
+  final Function(int, int) onReorder;
+  final Function(int)? onDelete;
 
-  @override
-  State<DocumentCanvas> createState() => _DocumentCanvasState();
-}
-
-class _DocumentCanvasState extends State<DocumentCanvas> {
-  late List<Block> blocksOnCanvas;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize with sample data - replace with your data source
-    blocksOnCanvas = [
-      Block(title: 'Block 1', preview: 'preview 1'),
-      Block(title: 'Block 2', preview: 'preview 2'),
-      Block(title: 'Block 3', preview: 'preview 3'),
-    ];
-  }
-
-  void _onReorder(int oldIndex, int newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-      final Block item = blocksOnCanvas.removeAt(oldIndex);
-      blocksOnCanvas.insert(newIndex, item);
-    });
-  }
+  const DocumentCanvas({
+    super.key,
+    required this.blocks,
+    required this.onReorder,
+    this.onDelete,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 5),
-        Center(
-          child: Text(
-            'Canvas',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.orange[300],
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DragTarget<Block>(
+      onAcceptWithDetails: (block) {
+        // This will be handled by the parent via addBlockToCanvas
+        // The actual addition happens via Riverpod
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Column(
+          children: [
+            SizedBox(height: 5),
+            Center(
+              child: Text(
+                'Canvas',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange[300],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        SizedBox(height: 5),
-        Expanded(
-          child: ReorderableListView.builder(
-            itemCount: blocksOnCanvas.length,
-            itemBuilder: (context, index) {
-              final block = blocksOnCanvas[index];
-              return BlockPreview(
-                key: ValueKey(block.title),  // Unique key for reordering
-                title: block.title,
-                preview: block.preview,
-              );
-            },
-            onReorder: _onReorder,
-          ),
-        ),
-      ],
+            SizedBox(height: 5),
+            Expanded(
+              child: ReorderableListView.builder(
+                itemCount: blocks.length,
+                itemBuilder: (context, index) {
+                  final block = blocks[index];
+                  return BlockPreview(
+                    key: ValueKey('${block.title}_$index'),  // Unique key
+                    title: block.title,
+                    preview: block.preview,
+                    onTap: () {  },
+                    onDoubleTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => BlockEditDialog(
+                          initialTitle: block.title,
+                          initialPreview: block.preview,
+                          onSave: (title, preview) {
+                            ref.read(canvasBlocksProvider.notifier).updateBlock(index, Block(title: title, preview: preview));
+                          },
+                        ),
+                      );
+                    },
+                    onDelete: onDelete != null ? () => onDelete!(index) : null,
+                  );
+                },
+                onReorder: onReorder,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

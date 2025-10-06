@@ -3,7 +3,9 @@ import 'package:pachalik_flutter/widgets/block_preview.dart';
 import 'package:pachalik_flutter/models/block_model.dart';
 
 class BlocksList extends StatelessWidget {
-  const BlocksList({super.key});
+  final void Function(Block) onAddToCanvas;
+
+  const BlocksList({super.key, required this.onAddToCanvas});
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class BlocksList extends StatelessWidget {
               return BlockPreview(
                 title: block.title,
                 preview: block.preview,
+                onLongPress: () => onAddToCanvas(block),
               );
             },
           ),
